@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<article class="max-w-6xl mx-auto px-4 py-12">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+    <!-- ── Main Content ── -->
+    <div class="lg:col-span-8">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-xs font-mono-custom text-ink-400 mb-8">
+        <a href="{{ url_for('index') }}" class="hover:text-accent">Home</a>
+        <span>›</span>
+        {% if post.category %}
+        <a href="{{ url_for('category', slug=post.category.slug) }}" class="hover:text-accent">{{ post.category.name }}</a>
+        <span>›</span>
+        {% endif %}
+        <span class="text-ink-600">{{ post.title[:40] }}{% if post.title|length > 40 %}…{% endif %}</span>
+      </nav>
+
+      <!-- Header -->
+      <header class="mb-10 fade-up">
+        {% if post.category %}
+        <a href="{{ url_for('category', slug=post.category.slug) }}"
+           class="inline-block text-xs font-mono-custom uppercase tracking-widest text-accent mb-4 hover:underline">
+          {{ post.category.name }}
+        </a>
+        {% endif %}
+
+        <h1 class="font-display text-4xl md:text-5xl font-black text-ink-950 leading-tight mb-6">
+          {{ post.title }}
+        </h1>
+
+        <div class="flex items-center gap-4 flex-wrap">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-full bg-ink-200 flex items-center justify-center text-sm font-bold text-ink-600">
+              {{ post.author[0].upper() }}
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-ink-800">{{ post.author }}</p>
+              <p class="text-xs text-ink-400">{{ post.created_at.strftime('%B %d, %Y') }}</p>
+            </div>
+          </div>
+          <span class="text-ink-300">·</span>
+          <span class="text-sm text-ink-500 font-mono-custom">{{ post.read_time }} min read</span>
+          <span class="text-ink-300">·</span>
+          <span class="text-sm text-ink-500 font-mono-custom">{{ post.comments|length }} comment{{ 's' if post.comments|length != 1 }}</span>
+        </div>
+      </header>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3 mb-10">
+        <div class="w-12 h-0.5 bg-accent"></div>
+        <div class="flex-1 h-px bg-ink-200"></div>
+      </div>
+
+      <!-- Post Content -->
+      <div class="prose-inkwell fade-up fade-up-delay-1">
+        {% for paragraph in post.content.split('\n\n') %}
+          {% if paragraph.strip() %}
+            <p>{{ paragraph.strip() }}</p>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Tags / Footer -->
+      <div class="flex items-center gap-3 mt-12 pt-8 border-t border-ink-200">
+        {% if post.category %}
+        <a href="{{ url_for('category', slug=post.category.slug) }}"
+           class="text-xs font-mono-custom bg-ink-100 hover:bg-ink-200 text-ink-600 px-3 py-1.5 rounded">
+          {{ post.category.name }}
+        </a>
+        {% endif %}
+        <span class="ml-auto text-xs text-ink-400">Last updated {{ post.updated_at.strftime('%b %d, %Y') }}</span>
+      </div>
+
+      <!-- ── Comments ── -->
+      <section class="mt-16" id="comments">
+        <h2 class="font-display text-2xl font-bold text-ink-950 mb-8 flex items-center gap-3">
+          Comments
+          <span class="text-base font-mono-custom text-ink-400 font-normal">({{ post.comments|length }})</span>
+        </h2>
+
+        {% if post.comments %}
+        <div class="space-y-6 mb-12">
+          {% for comment in post.comments %}
+          <div class="bg-white border border-ink-100 rounded-lg p-6">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-ink-200 flex items-center justify-center text-xs font-bold text-ink-600">
+                  {{ comment.name[0].upper() }}
+                </div>
+                <span class="font-semibold text-sm text-ink-800">{{ comment.name }}</span>
+              </div>
+              <span class="text-xs text-ink-400 font-mono-custom">{{ comment.created_at.strftime('%b %d, %Y') }}</span>
+            </div>
+            <p class="text-sm text-ink-700 leading-relaxed ml-11">{{ comment.body }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-ink-400 text-sm mb-10 italic">No comments yet. Be the first to respond.</p>
+        {% endif %}
+
+        <!-- Comment Form -->
+        <div class="bg-ink-50 border border-ink-200 rounded-lg p-8">
+          <h3 class="font-display text-xl font-bold text-ink-950 mb-6">Leave a Comment</h3>
+          <form action="{{ url_for('add_comment', slug=post.slug) }}" method="POST" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-mono-custom uppercase tracking-wider text-ink-600 mb-1.5">Name *</label>
+                <input type="text" name="name" required
+                  class="w-full px-4 py-2.5 border border-ink-300 rounded text-sm text-ink-800 bg-white focus:outline-none focus:border-accent" placeholder="Your name">
+              </div>
+              <div>
+                <label class="block text-xs font-mono-custom uppercase tracking-wider text-ink-600 mb-1.5">Email *</label>
+                <input type="email" name="email" required
+                  class="w-full px-4 py-2.5 border border-ink-300 rounded text-sm text-ink-800 bg-white focus:outline-none focus:border-accent" placeholder="you@example.com">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-mono-custom uppercase tracking-wider text-ink-600 mb-1.5">Comment *</label>
+              <textarea name="body" required rows="5"
+                class="w-full px-4 py-2.5 border border-ink-300 rounded text-sm text-ink-800 bg-white focus:outline-none focus:border-accent resize-none"
+                placeholder="Share your thoughts…"></textarea>
+            </div>
+            <button type="submit"
+              class="bg-accent text-white px-6 py-2.5 rounded text-sm font-semibold hover:bg-red-700">
+              Post Comment →
+            </button>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── Sidebar ── -->
+    <aside class="lg:col-span-4 space-y-8">
+
+      <!-- About Author -->
+      <div class="bg-white border border-ink-100 rounded-lg p-6">
+        <h3 class="font-mono-custom text-xs uppercase tracking-widest text-ink-400 mb-4">About the Author</h3>
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 rounded-full bg-ink-200 flex items-center justify-center text-lg font-bold text-ink-600">
+            {{ post.author[0].upper() }}
+          </div>
+          <div>
+            <p class="font-semibold text-ink-800">{{ post.author }}</p>
+            <p class="text-xs text-ink-400">Contributor</p>
+          </div>
+        </div>
+        <p class="text-xs text-ink-500 leading-relaxed">Writing about ideas that matter. Regular contributor to The Inkwell.</p>
+      </div>
+
+      <!-- Related Posts -->
+      {% if related %}
+      <div class="bg-white border border-ink-100 rounded-lg p-6">
+        <h3 class="font-mono-custom text-xs uppercase tracking-widest text-ink-400 mb-4">Related Articles</h3>
+        <div class="space-y-4">
+          {% for r in related %}
+          <div class="pb-4 border-b border-ink-100 last:border-0 last:pb-0">
+            {% if r.category %}
+            <span class="text-xs font-mono-custom text-accent uppercase">{{ r.category.name }}</span>
+            {% endif %}
+            <a href="{{ url_for('post_detail', slug=r.slug) }}"
+               class="block font-display font-bold text-sm text-ink-800 hover:text-accent leading-snug mt-1">
+              {{ r.title }}
+            </a>
+            <p class="text-xs text-ink-400 mt-1">{{ r.read_time }} min · {{ r.created_at.strftime('%b %d') }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Recent Posts -->
+      <div class="bg-white border border-ink-100 rounded-lg p-6">
+        <h3 class="font-mono-custom text-xs uppercase tracking-widest text-ink-400 mb-4">Recent Articles</h3>
+        <div class="space-y-4">
+          {% for rp in recent_posts[:5] %}
+          <div class="pb-4 border-b border-ink-100 last:border-0 last:pb-0">
+            <a href="{{ url_for('post_detail', slug=rp.slug) }}"
+               class="block font-display font-bold text-sm text-ink-800 hover:text-accent leading-snug">
+              {{ rp.title }}
+            </a>
+            <p class="text-xs text-ink-400 mt-1">{{ rp.created_at.strftime('%b %d, %Y') }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="bg-white border border-ink-100 rounded-lg p-6">
+        <h3 class="font-mono-custom text-xs uppercase tracking-widest text-ink-400 mb-4">Browse Topics</h3>
+        <div class="flex flex-wrap gap-2">
+          {% for cat in categories %}
+          <a href="{{ url_for('category', slug=cat.slug) }}"
+             class="text-xs font-mono-custom bg-ink-50 border border-ink-200 hover:border-accent hover:text-accent text-ink-600 px-3 py-1.5 rounded">
+            {{ cat.name }}
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </aside>
+  </div>
+</article>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}About — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-20">
+  <div class="fade-up">
+    <p class="font-mono-custom text-xs uppercase tracking-widest text-accent mb-4">About</p>
+    <h1 class="font-display text-6xl font-black text-ink-950 mb-8 leading-tight">
+      The Inkwell
+    </h1>
+    <div class="w-16 h-0.5 bg-accent mb-10"></div>
+  </div>
+
+  <div class="prose-inkwell fade-up fade-up-delay-1">
+    <p>The Inkwell is an independent publication for people who still believe that words are worth slowing down for. We publish long-form essays, considered criticism, and dispatches from wherever the writing is good.</p>
+
+    <p>We don't chase trends. We don't optimize for engagement. We write about things because they interest us deeply, and we trust that deep interest is contagious.</p>
+
+    <p>Our contributors come from journalism, academia, design, technology, and the productive margins between them. What they share is a commitment to writing that respects the reader's intelligence and time — which means not wasting either.</p>
+
+    <h2>What We Publish</h2>
+    <p>Long reads on technology and its cultural consequences. Essays on design and the built world. Travel writing that actually goes somewhere. Cultural criticism that has a point of view.</p>
+
+    <p>We publish when we have something worth saying. Not on a schedule. Not to fill a quota. When the work is ready.</p>
+
+    <h2>The Name</h2>
+    <p>An inkwell is the vessel that holds the material of writing before it becomes something. We like the implication: this is a place where ideas are held, prepared, and then released into the world in a form someone might actually want to read.</p>
+
+    <h2>Write for Us</h2>
+    <p>We're always interested in hearing from writers with something urgent to say. If you have a piece or a pitch, we'd love to hear it. We read everything we receive and respond to what interests us.</p>
+  </div>
+
+  <div class="mt-16 grid grid-cols-3 gap-6 py-10 border-y border-ink-200 fade-up fade-up-delay-2">
+    <div class="text-center">
+      <p class="font-display text-4xl font-black text-ink-950">{{ recent_posts|length }}+</p>
+      <p class="text-xs font-mono-custom uppercase tracking-widest text-ink-400 mt-1">Articles</p>
+    </div>
+    <div class="text-center">
+      <p class="font-display text-4xl font-black text-ink-950">{{ categories|length }}</p>
+      <p class="text-xs font-mono-custom uppercase tracking-widest text-ink-400 mt-1">Topics</p>
+    </div>
+    <div class="text-center">
+      <p class="font-display text-4xl font-black text-ink-950">2024</p>
+      <p class="text-xs font-mono-custom uppercase tracking-widest text-ink-400 mt-1">Founded</p>
+    </div>
+  </div>
+
+  <div class="mt-10 text-center fade-up fade-up-delay-3">
+    <a href="{{ url_for('index') }}" class="inline-flex items-center gap-2 bg-ink-950 text-ink-50 px-6 py-3 rounded font-semibold text-sm hover:bg-accent">
+      Read the Latest →
+    </a>
+  </div>
+</div>
+{% endblock %}

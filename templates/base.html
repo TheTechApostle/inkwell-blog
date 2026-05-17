@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            body: ['"DM Sans"', 'sans-serif'],
+            mono: ['"DM Mono"', 'monospace'],
+          },
+          colors: {
+            ink: {
+              50: '#faf9f6',
+              100: '#f0ede4',
+              200: '#e0d9c8',
+              300: '#c9bfa8',
+              400: '#a89880',
+              500: '#8a7660',
+              600: '#6e5d4a',
+              700: '#564839',
+              800: '#3d3328',
+              900: '#261f18',
+              950: '#140f0b',
+            },
+            accent: '#c8472a',
+            gold: '#b8953a',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'DM Sans', sans-serif; }
+    .font-display { font-family: 'Playfair Display', serif; }
+    .font-mono-custom { font-family: 'DM Mono', monospace; }
+
+    /* Smooth transitions */
+    * { transition-property: color, background-color, border-color, opacity, transform;
+        transition-duration: 200ms; transition-timing-function: ease; }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #faf9f6; }
+    ::-webkit-scrollbar-thumb { background: #c9bfa8; border-radius: 3px; }
+
+    /* Prose styles */
+    .prose-inkwell p { margin-bottom: 1.5rem; line-height: 1.85; color: #3d3328; }
+    .prose-inkwell h2 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; margin: 2.5rem 0 1rem; color: #140f0b; }
+    .prose-inkwell h3 { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 600; margin: 2rem 0 0.75rem; color: #140f0b; }
+    .prose-inkwell blockquote { border-left: 3px solid #c8472a; padding: 0.5rem 0 0.5rem 1.5rem; margin: 2rem 0; font-style: italic; color: #6e5d4a; font-family: 'Playfair Display', serif; font-size: 1.125rem; }
+
+    /* Flash messages */
+    .flash-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .flash-error   { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+
+    /* Nav underline */
+    .nav-link { position: relative; }
+    .nav-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px; background: #c8472a; transition: width 0.3s ease; }
+    .nav-link:hover::after { width: 100%; }
+
+    /* Article card hover */
+    .article-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+    .article-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(20,15,11,0.12); }
+
+    /* Page fade in */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-up { animation: fadeUp 0.5s ease forwards; }
+    .fade-up-delay-1 { animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
+    .fade-up-delay-2 { animation-delay: 0.2s; opacity: 0; animation-fill-mode: forwards; }
+    .fade-up-delay-3 { animation-delay: 0.3s; opacity: 0; animation-fill-mode: forwards; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-ink-50 text-ink-900 min-h-screen flex flex-col">
+
+  <!-- ── Top Bar ── -->
+  <div class="bg-ink-950 text-ink-300 text-center py-2 text-xs font-mono-custom tracking-widest uppercase">
+    Est. 2024 &nbsp;·&nbsp; Independent Publishing &nbsp;·&nbsp; Words Worth Reading
+  </div>
+
+  <!-- ── Header ── -->
+  <header class="bg-ink-50 border-b border-ink-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex items-center justify-between py-4">
+
+        <!-- Logo -->
+        <a href="{{ url_for('index') }}" class="flex items-baseline gap-2 group">
+          <span class="font-display text-3xl font-black text-ink-950 tracking-tight group-hover:text-accent" style="transition: color 0.2s">The</span>
+          <span class="font-display text-3xl font-black text-accent italic">Inkwell</span>
+        </a>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="{{ url_for('index') }}" class="nav-link text-sm font-medium text-ink-700 hover:text-ink-950">Home</a>
+          {% for cat in categories %}
+          <a href="{{ url_for('category', slug=cat.slug) }}" class="nav-link text-sm font-medium text-ink-700 hover:text-ink-950">{{ cat.name }}</a>
+          {% endfor %}
+          <a href="{{ url_for('about') }}" class="nav-link text-sm font-medium text-ink-700 hover:text-ink-950">About</a>
+          <a href="{{ url_for('admin') }}" class="text-sm font-medium bg-ink-950 text-ink-50 px-4 py-1.5 rounded hover:bg-accent" style="transition: background 0.2s">Admin</a>
+        </nav>
+
+        <!-- Search & Mobile Toggle -->
+        <div class="flex items-center gap-3">
+          <form action="{{ url_for('search') }}" method="GET" class="hidden md:flex items-center border border-ink-300 rounded overflow-hidden">
+            <input name="q" type="text" placeholder="Search…" value="{{ request.args.get('q', '') }}"
+              class="px-3 py-1.5 text-sm bg-transparent outline-none text-ink-800 placeholder-ink-400 w-36 focus:w-48" style="transition: width 0.3s">
+            <button type="submit" class="px-3 py-1.5 bg-ink-100 text-ink-600 hover:bg-ink-200 text-sm">↵</button>
+          </form>
+          <button id="menu-toggle" class="md:hidden p-2 text-ink-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="hidden md:hidden border-t border-ink-200 py-4 flex flex-col gap-3">
+        <a href="{{ url_for('index') }}" class="text-sm font-medium text-ink-700 hover:text-accent">Home</a>
+        {% for cat in categories %}
+        <a href="{{ url_for('category', slug=cat.slug) }}" class="text-sm font-medium text-ink-700 hover:text-accent">{{ cat.name }}</a>
+        {% endfor %}
+        <a href="{{ url_for('about') }}" class="text-sm font-medium text-ink-700 hover:text-accent">About</a>
+        <a href="{{ url_for('admin') }}" class="text-sm font-medium text-ink-700 hover:text-accent">Admin</a>
+        <form action="{{ url_for('search') }}" method="GET" class="flex border border-ink-300 rounded overflow-hidden mt-2">
+          <input name="q" type="text" placeholder="Search articles…" class="flex-1 px-3 py-2 text-sm outline-none bg-transparent">
+          <button type="submit" class="px-3 py-2 bg-ink-100 text-sm">↵</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Flash Messages ── -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="max-w-6xl mx-auto px-4 pt-4 w-full">
+        {% for cat, msg in messages %}
+          <div class="flash-{{ cat }} px-4 py-3 rounded mb-2 text-sm">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- ── Main Content ── -->
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="bg-ink-950 text-ink-300 mt-20">
+    <div class="max-w-6xl mx-auto px-4 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div>
+          <div class="flex items-baseline gap-1 mb-4">
+            <span class="font-display text-2xl font-black text-ink-50">The</span>
+            <span class="font-display text-2xl font-black text-accent italic">Inkwell</span>
+          </div>
+          <p class="text-sm text-ink-400 leading-relaxed">A place for long reads, considered opinions, and writing that takes its time. No algorithmic feeds. Just good writing.</p>
+        </div>
+        <div>
+          <h4 class="text-ink-50 font-semibold mb-4 text-sm uppercase tracking-wider">Topics</h4>
+          <ul class="space-y-2">
+            {% for cat in categories %}
+            <li><a href="{{ url_for('category', slug=cat.slug) }}" class="text-sm text-ink-400 hover:text-accent">{{ cat.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-ink-50 font-semibold mb-4 text-sm uppercase tracking-wider">Recent</h4>
+          <ul class="space-y-3">
+            {% for rp in recent_posts[:4] %}
+            <li>
+              <a href="{{ url_for('post_detail', slug=rp.slug) }}" class="text-sm text-ink-400 hover:text-accent leading-snug block">{{ rp.title }}</a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-ink-800 mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
+        <p class="text-xs text-ink-500 font-mono-custom">© 2024 The Inkwell. All rights reserved.</p>
+        <a href="{{ url_for('admin') }}" class="text-xs text-ink-600 hover:text-ink-400 font-mono-custom">Admin Panel →</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('menu-toggle').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+  </script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

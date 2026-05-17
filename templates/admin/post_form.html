@@ -1,0 +1,98 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ 'Edit Post' if post else 'New Post' }}{% endblock %}
+{% block page_title %}{{ 'Edit Post' if post else 'New Post' }}{% endblock %}
+
+{% block content %}
+<form action="{{ url_for('edit_post', id=post.id) if post else url_for('new_post') }}" method="POST">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Main -->
+    <div class="lg:col-span-2 space-y-5">
+      <div class="bg-white border border-ink-200 rounded-lg p-6">
+        <div class="mb-5">
+          <label class="block text-xs font-mono uppercase tracking-wider text-ink-500 mb-1.5" style="font-family:monospace">Title *</label>
+          <input type="text" name="title" required
+            value="{{ post.title if post else '' }}"
+            placeholder="Article title…"
+            class="w-full px-4 py-3 border border-ink-300 rounded text-ink-900 focus:outline-none focus:border-accent font-display text-xl font-bold placeholder-ink-300">
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-xs font-mono uppercase tracking-wider text-ink-500 mb-1.5" style="font-family:monospace">Excerpt</label>
+          <textarea name="excerpt" rows="2"
+            placeholder="Brief description shown in listings (auto-generated if empty)…"
+            class="w-full px-4 py-2.5 border border-ink-300 rounded text-sm text-ink-800 focus:outline-none focus:border-accent placeholder-ink-300">{{ post.excerpt if post else '' }}</textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono uppercase tracking-wider text-ink-500 mb-1.5" style="font-family:monospace">Content *</label>
+          <textarea name="content" rows="22" required
+            placeholder="Write your article here. Separate paragraphs with blank lines. Use ## for headings and > for blockquotes."
+            class="w-full px-4 py-3 border border-ink-300 rounded text-sm text-ink-800 focus:outline-none focus:border-accent placeholder-ink-300 font-mono" style="font-family:monospace; line-height:1.7">{{ post.content if post else '' }}</textarea>
+          <p class="text-xs text-ink-400 mt-1">Tip: Separate paragraphs with a blank line. Read time is calculated automatically.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-5">
+
+      <!-- Publish -->
+      <div class="bg-white border border-ink-200 rounded-lg p-5">
+        <h3 class="text-xs font-mono uppercase tracking-wider text-ink-500 mb-4" style="font-family:monospace">Publish</h3>
+        <div class="space-y-3 mb-5">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" name="published" {% if not post or post.published %}checked{% endif %}
+              class="w-4 h-4 rounded accent-red-600">
+            <span class="text-sm text-ink-700">Published</span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" name="featured" {% if post and post.featured %}checked{% endif %}
+              class="w-4 h-4 rounded accent-red-600">
+            <span class="text-sm text-ink-700">Featured (hero post)</span>
+          </label>
+        </div>
+        <div class="flex gap-3 pt-4 border-t border-ink-100">
+          <button type="submit" class="flex-1 bg-accent text-white py-2.5 rounded text-sm font-semibold hover:bg-red-700">
+            {{ 'Update Post' if post else 'Publish Post' }}
+          </button>
+          <a href="{{ url_for('admin') }}" class="px-4 py-2.5 border border-ink-300 rounded text-sm text-ink-600 hover:bg-ink-50">Cancel</a>
+        </div>
+      </div>
+
+      <!-- Author -->
+      <div class="bg-white border border-ink-200 rounded-lg p-5">
+        <label class="block text-xs font-mono uppercase tracking-wider text-ink-500 mb-2" style="font-family:monospace">Author</label>
+        <input type="text" name="author" value="{{ post.author if post else 'Admin' }}"
+          class="w-full px-3 py-2 border border-ink-300 rounded text-sm text-ink-800 focus:outline-none focus:border-accent">
+      </div>
+
+      <!-- Category -->
+      <div class="bg-white border border-ink-200 rounded-lg p-5">
+        <label class="block text-xs font-mono uppercase tracking-wider text-ink-500 mb-2" style="font-family:monospace">Category</label>
+        <select name="category_id"
+          class="w-full px-3 py-2 border border-ink-300 rounded text-sm text-ink-800 focus:outline-none focus:border-accent bg-white">
+          <option value="">— None —</option>
+          {% for cat in categories %}
+          <option value="{{ cat.id }}" {% if post and post.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+        <a href="{{ url_for('manage_categories') }}" class="text-xs text-accent hover:underline mt-2 inline-block">Manage categories →</a>
+      </div>
+
+      <!-- Post info (edit only) -->
+      {% if post %}
+      <div class="bg-ink-50 border border-ink-200 rounded-lg p-5 text-xs font-mono text-ink-400 space-y-2" style="font-family:monospace">
+        <p>ID: #{{ post.id }}</p>
+        <p>Slug: /post/{{ post.slug }}</p>
+        <p>Created: {{ post.created_at.strftime('%b %d, %Y %H:%M') }}</p>
+        <p>Comments: {{ post.comments|length }}</p>
+        <div class="pt-2">
+          <a href="{{ url_for('post_detail', slug=post.slug) }}" target="_blank" class="text-accent hover:underline">View live →</a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</form>
+{% endblock %}

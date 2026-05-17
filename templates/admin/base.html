@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Admin{% endblock %} — Inkwell CMS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { body: ['"DM Sans"', 'sans-serif'], mono: ['"DM Mono"', 'monospace'], display: ['"Playfair Display"', 'serif'] },
+          colors: { ink: { 50:'#faf9f6',100:'#f0ede4',200:'#e0d9c8',300:'#c9bfa8',400:'#a89880',500:'#8a7660',600:'#6e5d4a',700:'#564839',800:'#3d3328',900:'#261f18',950:'#140f0b' }, accent: '#c8472a' }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'DM Sans', sans-serif; }
+    .flash-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .flash-error   { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    textarea { resize: vertical; }
+  </style>
+</head>
+<body class="bg-ink-50 text-ink-900 min-h-screen flex">
+
+  <!-- Sidebar -->
+  <aside class="w-60 bg-ink-950 text-ink-300 flex flex-col min-h-screen shrink-0">
+    <div class="px-6 py-6 border-b border-ink-800">
+      <a href="/" class="flex items-baseline gap-1">
+        <span class="font-display text-xl font-black text-ink-50">The</span>
+        <span class="font-display text-xl font-black text-accent italic">Inkwell</span>
+      </a>
+      <p class="text-xs text-ink-600 mt-1 font-mono" style="font-family:monospace">CMS Dashboard</p>
+    </div>
+    <nav class="flex-1 px-4 py-6 space-y-1">
+      <a href="{{ url_for('admin') }}" class="flex items-center gap-3 px-3 py-2 rounded text-sm hover:bg-ink-800 hover:text-ink-50 {% if request.endpoint == 'admin' %}bg-ink-800 text-ink-50{% endif %}">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        All Posts
+      </a>
+      <a href="{{ url_for('new_post') }}" class="flex items-center gap-3 px-3 py-2 rounded text-sm hover:bg-ink-800 hover:text-ink-50 {% if request.endpoint == 'new_post' %}bg-ink-800 text-ink-50{% endif %}">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        New Post
+      </a>
+      <a href="{{ url_for('manage_categories') }}" class="flex items-center gap-3 px-3 py-2 rounded text-sm hover:bg-ink-800 hover:text-ink-50 {% if request.endpoint == 'manage_categories' %}bg-ink-800 text-ink-50{% endif %}">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+        Categories
+      </a>
+      <a href="{{ url_for('analytics') }}" class="flex items-center gap-3 px-3 py-2 rounded text-sm hover:bg-ink-800 hover:text-ink-50 {% if request.endpoint == 'analytics' %}bg-ink-800 text-ink-50{% endif %}">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Analytics
+      </a>
+      <a href="{{ url_for('autoposter_status') }}" class="flex items-center gap-3 px-3 py-2 rounded text-sm hover:bg-ink-800 hover:text-ink-50 {% if request.endpoint == 'autoposter_status' or request.endpoint == 'trigger_autoposter' %}bg-ink-800 text-ink-50{% endif %}">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Auto-Poster
+      </a>
+      <div class="pt-4 mt-4 border-t border-ink-800">
+        <a href="{{ url_for('index') }}" class="flex items-center gap-3 px-3 py-2 rounded text-sm text-ink-500 hover:text-ink-300">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          View Site
+        </a>
+        <a href="{{ url_for('admin_logout') }}" class="flex items-center gap-3 px-3 py-2 rounded text-sm text-red-400 hover:text-red-300">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          Logout
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="bg-white border-b border-ink-200 px-8 py-4 flex items-center justify-between">
+      <h1 class="font-semibold text-ink-800">{% block page_title %}Dashboard{% endblock %}</h1>
+      <span class="text-xs font-mono text-ink-400" style="font-family:monospace">Inkwell Admin v1.0</span>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="px-8 pt-4">
+          {% for cat, msg in messages %}
+            <div class="flash-{{ cat }} px-4 py-3 rounded mb-2 text-sm">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <main class="flex-1 p-8">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

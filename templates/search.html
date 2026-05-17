@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Search: {{ query }} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+  <div class="mb-10">
+    <p class="font-mono-custom text-xs uppercase tracking-widest text-ink-400 mb-2">Search Results</p>
+    {% if query %}
+    <h1 class="font-display text-4xl font-black text-ink-950">
+      "{{ query }}"
+    </h1>
+    <p class="text-ink-500 mt-2 text-sm">{{ posts|length }} result{{ 's' if posts|length != 1 }} found</p>
+    {% else %}
+    <h1 class="font-display text-4xl font-black text-ink-950">Search</h1>
+    {% endif %}
+  </div>
+
+  <!-- Search bar -->
+  <form action="{{ url_for('search') }}" method="GET" class="flex max-w-lg border border-ink-300 rounded-lg overflow-hidden mb-12">
+    <input name="q" type="text" value="{{ query }}" placeholder="Search articles…"
+      class="flex-1 px-4 py-3 text-sm outline-none text-ink-800 placeholder-ink-400">
+    <button type="submit" class="px-6 py-3 bg-ink-950 text-ink-50 text-sm font-semibold hover:bg-accent">Search</button>
+  </form>
+
+  {% if posts %}
+  <div class="space-y-6">
+    {% for post in posts %}
+    <div class="bg-white border border-ink-100 rounded-lg p-6 article-card">
+      <div class="flex items-center gap-3 mb-3">
+        {% if post.category %}
+        <a href="{{ url_for('category', slug=post.category.slug) }}" class="text-xs font-mono-custom uppercase tracking-widest text-accent">{{ post.category.name }}</a>
+        {% endif %}
+        <span class="text-xs text-ink-400 font-mono-custom">{{ post.read_time }} min · {{ post.created_at.strftime('%b %d, %Y') }}</span>
+      </div>
+      <h2 class="font-display text-2xl font-bold text-ink-950 mb-2">
+        <a href="{{ url_for('post_detail', slug=post.slug) }}" class="hover:text-accent">{{ post.title }}</a>
+      </h2>
+      <p class="text-sm text-ink-600 leading-relaxed mb-4">{{ post.excerpt }}</p>
+      <a href="{{ url_for('post_detail', slug=post.slug) }}" class="text-sm font-semibold text-accent hover:underline">Read article →</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% elif query %}
+  <div class="text-center py-20">
+    <p class="font-display text-3xl text-ink-300 mb-3">No results for "{{ query }}"</p>
+    <p class="text-ink-400 text-sm">Try different keywords or browse by topic.</p>
+    <div class="flex flex-wrap justify-center gap-2 mt-6">
+      {% for cat in categories %}
+      <a href="{{ url_for('category', slug=cat.slug) }}" class="text-xs border border-ink-300 hover:border-accent hover:text-accent px-3 py-1.5 rounded font-mono-custom text-ink-600">{{ cat.name }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

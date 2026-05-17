@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ site_name }} — Long Reads Worth Your Time{% endblock %}
+
+{% block content %}
+
+<!-- ── Featured Post Hero ── -->
+{% if featured %}
+<section class="bg-ink-950 text-ink-50 relative overflow-hidden">
+  <div class="absolute inset-0 opacity-5">
+    <div class="absolute inset-0" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.08) 39px, rgba(255,255,255,.08) 40px), repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,.08) 39px, rgba(255,255,255,.08) 40px);"></div>
+  </div>
+  <div class="max-w-6xl mx-auto px-4 py-20 relative">
+    <div class="max-w-2xl fade-up">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="bg-accent text-white text-xs font-mono-custom uppercase tracking-widest px-3 py-1 rounded">Featured</span>
+        {% if featured.category %}
+        <span class="text-ink-400 text-xs font-mono-custom uppercase tracking-widest">{{ featured.category.name }}</span>
+        {% endif %}
+      </div>
+      <h1 class="font-display text-4xl md:text-6xl font-black leading-tight mb-6 text-ink-50">
+        {{ featured.title }}
+      </h1>
+      <p class="text-ink-300 text-lg leading-relaxed mb-8">{{ featured.excerpt }}</p>
+      <div class="flex items-center gap-6">
+        <a href="{{ url_for('post_detail', slug=featured.slug) }}"
+           class="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 font-semibold text-sm hover:bg-red-700 rounded">
+          Read Article
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </a>
+        <span class="text-ink-500 text-sm font-mono-custom">By {{ featured.author }} · {{ featured.read_time }} min read</span>
+      </div>
+    </div>
+  </div>
+</section>
+{% else %}
+<!-- No featured post: just a stylish masthead -->
+<section class="bg-ink-950 text-ink-50 py-16">
+  <div class="max-w-6xl mx-auto px-4 text-center fade-up">
+    <p class="font-mono-custom text-ink-500 uppercase tracking-widest text-xs mb-4">Independent Publishing</p>
+    <h1 class="font-display text-5xl md:text-7xl font-black">Long reads worth your time.</h1>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── Section divider ── -->
+<div class="max-w-6xl mx-auto px-4 mt-14 mb-8 flex items-center gap-4">
+  <span class="font-mono-custom text-xs uppercase tracking-widest text-ink-500">Latest Articles</span>
+  <div class="flex-1 h-px bg-ink-200"></div>
+  <span class="font-mono-custom text-xs text-ink-400">{{ posts.total }} total</span>
+</div>
+
+<!-- ── Posts Grid ── -->
+<section class="max-w-6xl mx-auto px-4 pb-16">
+  {% if posts.items %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {% for post in posts.items %}
+    <article class="article-card bg-white border border-ink-100 rounded-lg overflow-hidden fade-up fade-up-delay-{{ loop.index % 3 + 1 }}">
+
+      <!-- Category Bar -->
+      <div class="h-1 {% if post.category %}bg-accent{% else %}bg-ink-200{% endif %}"></div>
+
+      <div class="p-6">
+        <!-- Meta -->
+        <div class="flex items-center justify-between mb-4">
+          {% if post.category %}
+          <a href="{{ url_for('category', slug=post.category.slug) }}"
+             class="text-xs font-mono-custom uppercase tracking-widest text-accent hover:text-red-700">
+            {{ post.category.name }}
+          </a>
+          {% else %}
+          <span class="text-xs font-mono-custom uppercase tracking-widest text-ink-400">Uncategorized</span>
+          {% endif %}
+          <span class="text-xs text-ink-400 font-mono-custom">{{ post.read_time }} min</span>
+        </div>
+
+        <!-- Title -->
+        <h2 class="font-display text-xl font-bold text-ink-950 leading-snug mb-3">
+          <a href="{{ url_for('post_detail', slug=post.slug) }}" class="hover:text-accent">{{ post.title }}</a>
+        </h2>
+
+        <!-- Excerpt -->
+        <p class="text-sm text-ink-600 leading-relaxed mb-5 line-clamp-3">{{ post.excerpt }}</p>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between pt-4 border-t border-ink-100">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-full bg-ink-200 flex items-center justify-center text-xs font-bold text-ink-600">
+              {{ post.author[0].upper() }}
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-ink-700">{{ post.author }}</p>
+              <p class="text-xs text-ink-400">{{ post.created_at.strftime('%b %d, %Y') }}</p>
+            </div>
+          </div>
+          <a href="{{ url_for('post_detail', slug=post.slug) }}"
+             class="text-xs font-semibold text-accent hover:underline flex items-center gap-1">
+            Read <span>→</span>
+          </a>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if posts.pages > 1 %}
+  <nav class="flex justify-center items-center gap-2 mt-14">
+    {% if posts.has_prev %}
+    <a href="{{ url_for('index', page=posts.prev_num) }}"
+       class="px-4 py-2 border border-ink-300 text-sm hover:bg-ink-100 rounded font-medium text-ink-700">← Newer</a>
+    {% endif %}
+
+    {% for p in posts.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if p %}
+        <a href="{{ url_for('index', page=p) }}"
+           class="w-9 h-9 flex items-center justify-center rounded text-sm font-mono-custom
+                  {% if p == posts.page %}bg-ink-950 text-white{% else %}border border-ink-300 text-ink-700 hover:bg-ink-100{% endif %}">
+          {{ p }}
+        </a>
+      {% else %}
+        <span class="text-ink-400">…</span>
+      {% endif %}
+    {% endfor %}
+
+    {% if posts.has_next %}
+    <a href="{{ url_for('index', page=posts.next_num) }}"
+       class="px-4 py-2 border border-ink-300 text-sm hover:bg-ink-100 rounded font-medium text-ink-700">Older →</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-20">
+    <p class="font-display text-3xl text-ink-300 mb-4">No articles yet.</p>
+    <a href="{{ url_for('new_post') }}" class="text-sm text-accent hover:underline">Write the first one →</a>
+  </div>
+  {% endif %}
+</section>
+
+{% endblock %}

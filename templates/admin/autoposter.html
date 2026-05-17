@@ -1,0 +1,150 @@
+{% extends 'admin/base.html' %}
+{% block title %}Auto-Poster{% endblock %}
+{% block page_title %}Auto-Poster{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Status Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white border border-ink-200 rounded-lg p-4">
+      <p class="text-xs font-mono uppercase tracking-wider text-ink-400 mb-1" style="font-family:monospace">AI Posts</p>
+      <p class="text-3xl font-bold text-ink-900">{{ ai_posts|length }}</p>
+    </div>
+    <div class="bg-white border border-ink-200 rounded-lg p-4">
+      <p class="text-xs font-mono uppercase tracking-wider text-ink-400 mb-1" style="font-family:monospace">Interval</p>
+      <p class="text-3xl font-bold text-ink-900">{{ config.interval_hours }}<span class="text-base font-normal text-ink-400">h</span></p>
+    </div>
+    <div class="bg-white border border-ink-200 rounded-lg p-4">
+      <p class="text-xs font-mono uppercase tracking-wider text-ink-400 mb-1" style="font-family:monospace">News API</p>
+      <p class="text-lg font-semibold {% if config.news_api_set %}text-green-600{% else %}text-amber-500{% endif %}">
+        {% if config.news_api_set %}✓ Connected{% else %}⚠ Not set{% endif %}
+      </p>
+    </div>
+    <div class="bg-white border border-ink-200 rounded-lg p-4">
+      <p class="text-xs font-mono uppercase tracking-wider text-ink-400 mb-1" style="font-family:monospace">Groq API</p>
+      <p class="text-lg font-semibold {% if config.groq_api_set %}text-green-600{% else %}text-red-600{% endif %}">
+        {% if config.groq_api_set %}✓ Connected{% else %}✗ Required{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <!-- Setup Instructions -->
+  {% if not config.groq_api_set or not config.news_api_set %}
+  <div class="bg-amber-50 border border-amber-200 rounded-lg p-6">
+    <h3 class="font-semibold text-amber-800 mb-3">Setup Required</h3>
+    <div class="text-sm text-amber-700 space-y-3">
+      {% if not config.groq_api_set %}
+      <div>
+        <p class="font-semibold">1. GROQ_API_KEY (required — for writing articles)</p>
+        <p>Get your free key at <a href="https://console.groq.com" target="_blank" class="underline">console.groq.com</a></p>
+        <code class="block bg-amber-100 px-3 py-2 rounded mt-1 font-mono text-xs" style="font-family:monospace">export GROQ_API_KEY=gsk_...</code>
+      </div>
+      {% endif %}
+      {% if not config.news_api_set %}
+      <div>
+        <p class="font-semibold">2. NEWS_API_KEY (recommended — for real trending news)</p>
+        <p>Free tier at <a href="https://newsapi.org" target="_blank" class="underline">newsapi.org</a> (100 req/day free). Without it, demo headlines are used.</p>
+        <code class="block bg-amber-100 px-3 py-2 rounded mt-1 font-mono text-xs" style="font-family:monospace">export NEWS_API_KEY=your_key_here</code>
+      </div>
+      {% endif %}
+      <p class="mt-2">Then restart the app: <code class="bg-amber-100 px-2 py-0.5 rounded font-mono text-xs" style="font-family:monospace">python app.py</code></p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Config + Manual Trigger -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <div class="bg-white border border-ink-200 rounded-lg p-6">
+      <h3 class="font-semibold text-ink-800 mb-4">Configuration</h3>
+      <dl class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <dt class="text-ink-500">Schedule</dt>
+          <dd class="font-mono text-ink-800" style="font-family:monospace">Every {{ config.interval_hours }} hours</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-ink-500">Posts per run</dt>
+          <dd class="font-mono text-ink-800" style="font-family:monospace">{{ config.posts_per_run }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-ink-500">News country</dt>
+          <dd class="font-mono text-ink-800 uppercase" style="font-family:monospace">{{ config.news_country }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-ink-500">AI author name</dt>
+          <dd class="font-mono text-ink-800" style="font-family:monospace">{{ config.ai_author }}</dd>
+        </div>
+      </dl>
+      <div class="mt-4 pt-4 border-t border-ink-100 text-xs text-ink-400 space-y-1 font-mono" style="font-family:monospace">
+        <p>Override via environment variables:</p>
+        <p>AUTO_POST_INTERVAL_HOURS, AUTO_POSTS_PER_RUN, NEWS_COUNTRY</p>
+      </div>
+    </div>
+
+    <div class="bg-white border border-ink-200 rounded-lg p-6 flex flex-col">
+      <h3 class="font-semibold text-ink-800 mb-2">Manual Trigger</h3>
+      <p class="text-sm text-ink-500 mb-6">Run the auto-poster right now — fetches trending news and generates articles immediately. Runs in the background.</p>
+      <form action="{{ url_for('trigger_autoposter') }}" method="POST" class="mt-auto">
+        <button type="submit"
+          {% if not config.groq_api_set %}disabled title="Set GROQ_API_KEY first"{% endif %}
+          class="w-full bg-accent text-white py-3 rounded font-semibold text-sm hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Run Auto-Poster Now
+        </button>
+      </form>
+      <p class="text-xs text-ink-400 text-center mt-3">Refresh the page after ~15 seconds to see new posts.</p>
+    </div>
+  </div>
+
+  <!-- AI-generated posts list -->
+  <div class="bg-white border border-ink-200 rounded-lg overflow-hidden">
+    <div class="px-6 py-4 border-b border-ink-100 flex items-center justify-between">
+      <h3 class="font-semibold text-ink-800">AI-Generated Posts</h3>
+      <span class="text-xs font-mono text-ink-400" style="font-family:monospace">author: {{ config.ai_author }}</span>
+    </div>
+    {% if ai_posts %}
+    <table class="w-full text-sm">
+      <thead class="bg-ink-50 border-b border-ink-200">
+        <tr>
+          <th class="text-left px-6 py-3 text-xs font-mono uppercase tracking-wider text-ink-500" style="font-family:monospace">Title</th>
+          <th class="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-ink-500 hidden md:table-cell" style="font-family:monospace">Category</th>
+          <th class="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-ink-500 hidden md:table-cell" style="font-family:monospace">Posted</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-ink-100">
+        {% for post in ai_posts %}
+        <tr class="hover:bg-ink-50">
+          <td class="px-6 py-4">
+            <a href="{{ url_for('post_detail', slug=post.slug) }}" target="_blank"
+               class="font-medium text-ink-800 hover:text-accent line-clamp-1">{{ post.title }}</a>
+          </td>
+          <td class="px-4 py-4 hidden md:table-cell">
+            {% if post.category %}<span class="text-xs bg-ink-100 text-ink-600 px-2 py-1 rounded">{{ post.category.name }}</span>{% endif %}
+          </td>
+          <td class="px-4 py-4 text-ink-400 text-xs hidden md:table-cell">{{ post.created_at.strftime('%b %d, %Y %H:%M') }}</td>
+          <td class="px-4 py-4">
+            <div class="flex gap-2 justify-end">
+              <a href="{{ url_for('edit_post', id=post.id) }}" class="text-xs border border-ink-200 px-3 py-1.5 rounded text-ink-600 hover:text-accent hover:border-accent">Edit</a>
+              <form action="{{ url_for('delete_post', id=post.id) }}" method="POST"
+                    onsubmit="return confirm('Delete this AI post?')">
+                <button type="submit" class="text-xs border border-red-200 px-3 py-1.5 rounded text-red-500 hover:border-red-400">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="text-center py-14 text-ink-400">
+      <svg class="w-10 h-10 mx-auto mb-3 text-ink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      <p class="text-sm">No AI-generated posts yet.</p>
+      <p class="text-xs mt-1">Set your API keys and click "Run Auto-Poster Now".</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
